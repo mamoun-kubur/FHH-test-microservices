@@ -5,21 +5,30 @@ const axios = require("axios");
 
 app.use(bodyParser.json());
 
+/**
+ * 
+ * this is the gateway service endpoint that will call the other microservice
+ * and return the result to the client
+ * 
+ */
 app.post("/", async (req, res) => {
-  let data = {
-    width: req.body.width,
-    hight: req.body.hight,
-    depth: req.body.depth,
-  };
-
-  await axios
-    .post("http://localhost:2000/calculate", data)
-    .then(function (response) {
+  try {
+    let data = {
+      width: req.body.width,
+      hight: req.body.hight,
+      length: req.body.length,
+    };
+    let response = await axios.post("http://localhost:2000/calculate", data);
+    if (response.data.status) {
       return res.send({ message: `the box size is ${response.data.message}` });
-    })
-    .catch(function (error) {
-      return res.send({ message: error });
+    }
+    return res.send({ message: response.data.message });
+  } catch (err) {
+    return res.send({
+      status: false,
+      message: err.message,
     });
+  }
 });
 
 const port = 1000;
